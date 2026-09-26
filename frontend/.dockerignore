@@ -1,0 +1,15 @@
+# Repository metadata and local configuration
+.git/
+.gitignore
+.env*
+
+# Generated local files
+node_modules/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+npm-debug.log
+yarn-error.log
+.DS_Store
+Thumbs.db
