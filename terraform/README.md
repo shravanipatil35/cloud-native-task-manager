@@ -5,9 +5,9 @@ This configuration provisions the project's AWS VPC, public and private subnets,
 ## Configure and Apply
 
 1. Install Terraform 1.5 or newer and configure AWS CLI credentials with the required permissions.
-2. Copy `terraform.tfvars.example` to `terraform.tfvars`. Set a valid AMI and EKS version for the selected region, and update subnet CIDRs and availability zones as needed.
+2. Copy `terraform.tfvars.example` to `terraform.tfvars`. Set a valid AMI and supported EKS version for the selected region, update subnet CIDRs and availability zones, and replace the documentation-only `eks_public_access_cidrs` value with your restricted client CIDR.
 3. Generate an SSH key pair using the configured `ec2_key_pair_name`; place the public key at `keys/<key-name>.pub`. Never put the private key in this repository.
-4. Add your public IP in CIDR notation (for example, `/32`) to `allowed_ssh_cidrs` if you need EC2 SSH and Jenkins access. The default opens neither port to the internet.
+4. Add your public IP in CIDR notation (for example, `/32`) to `allowed_ssh_cidrs` only if you need EC2 SSH or Jenkins access. The default opens neither port to the internet.
 5. Run:
 
 ```sh

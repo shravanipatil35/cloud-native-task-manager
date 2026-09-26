@@ -1,0 +1,27 @@
+# Copy this file to terraform.tfvars and set region-valid values before applying.
+project_name = "cloud-native-task-manager"
+environment  = "dev"
+aws_region   = "us-east-1"
+
+# Required: use an AMI available in aws_region and an EKS version supported there.
+ec2_ami_id          = "ami-REPLACE_WITH_REGION_VALID_AMI"
+eks_cluster_version = "REPLACE_WITH_SUPPORTED_VERSION"
+eks_public_access_cidrs = ["203.0.113.10/32"] # Replace with your restricted client CIDR.
+
+ec2_instance_type = "t3.medium"
+ec2_key_pair_name = "cloud-native-task-manager-key"
+ec2_volume_size   = 50
+
+eks_cluster_name        = "taskmanager-eks"
+eks_node_instance_types = ["t3.medium"]
+eks_node_desired        = 2
+eks_node_min            = 1
+eks_node_max            = 4
+
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.20.0/24", "10.0.30.0/24"]
+availability_zones   = ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+# Add your public IP as a /32 before opening SSH or Jenkins access.
+allowed_ssh_cidrs = []
