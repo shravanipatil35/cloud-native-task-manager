@@ -45,4 +45,4 @@ Review AWS charges and the Terraform plan before applying. EKS, EC2, NAT gateway
 
 ## Jenkins Kubernetes Files
 
-`jenkins/jenkins-deployment.yaml` and `jenkins/jenkins-rbac.yaml` are optional Kubernetes resources for running Jenkins in a cluster. They are separate from the application deployment; the pipeline can also run on an external Jenkins controller and agent.
+`jenkins/jenkins-deployment.yaml` is an optional private Jenkins controller deployment with persistent storage. Install the EBS CSI add-on first, then use `kubectl port-forward -n jenkins service/jenkins 8080:8080` to complete the setup wizard. Its pod does not receive a Kubernetes API token. The pipeline can also run from an external Jenkins controller and agent; deployments authenticate to EKS using the configured AWS Jenkins credential.

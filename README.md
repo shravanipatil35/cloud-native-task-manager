@@ -57,6 +57,8 @@ The Jenkins pipeline needs a Linux agent with Docker, Docker Compose v2, AWS CLI
 
 The pipeline creates Kubernetes Secrets at deploy time from Jenkins credentials. No credential values belong in the repository. The cluster needs the AWS EBS CSI add-on for PostgreSQL storage; the pipeline waits for it before applying the claim. Install an ingress controller for the `nginx` class if you want to use `k8s/ingress.yaml`; the frontend load balancer works independently.
 
+The optional in-cluster Jenkins controller is internal-only. Install the EBS CSI add-on before applying its manifest, then access the UI with `kubectl port-forward -n jenkins service/jenkins 8080:8080` and complete Jenkins' setup wizard. The controller has no Kubernetes API token; pipeline deployments use the configured AWS Jenkins credential.
+
 Destroy disposable AWS infrastructure with `terraform destroy` after reviewing its plan. Persistent volumes and other resources can incur charges until removed.
 
 ## CI/CD Flow
@@ -71,4 +73,4 @@ Jenkins checks out the repository, builds both Docker images, starts the local C
 - `Jenkinsfile`: CI/CD pipeline
 - `k8s/`: namespace, application/database workloads, storage, and ingress
 - `terraform/`: AWS VPC, EC2, EKS, IAM, and security groups
-- `jenkins/`: optional Kubernetes RBAC and deployment manifests for Jenkins
+- `jenkins/`: optional private Kubernetes deployment for the Jenkins controller
