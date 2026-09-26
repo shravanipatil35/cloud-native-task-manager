@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 import os
 import secrets
 from urllib.parse import quote_plus
@@ -28,6 +29,7 @@ def _database_uri():
 
 def create_app():
     """Application factory function"""
+    load_dotenv()
 
     app = Flask(
         __name__,
