@@ -1,534 +1,345 @@
-#  Cloud-Native Task Manager – Complete DevOps Platform
+# Cloud-Native Task Manager – Complete DevOps Platform
 
-A full-stack Task Manager web application demonstrating an end-to-end DevOps workflow using **Flask, PostgreSQL, Docker, Kubernetes, AWS EKS, Terraform, Jenkins, and Docker Hub**.
+A full-stack task management application deployed using modern DevOps and cloud-native practices.
 
-The project demonstrates how an application can be developed locally, containerized with Docker, infrastructure can be provisioned using Infrastructure as Code, the application can be deployed to Kubernetes on AWS EKS, and the complete build/test/deployment process can be automated using Jenkins CI/CD.
+This project demonstrates the complete flow from application development to containerization, infrastructure provisioning, Kubernetes deployment, and CI/CD automation using Jenkins.
 
-This project is designed as a practical DevOps portfolio project covering:
+The main focus of the project is to understand and demonstrate practical DevOps concepts such as:
 
-* Full-stack web application deployment
-* Containerization with Docker
-* Local multi-container development with Docker Compose
-* Infrastructure as Code with Terraform
-* AWS networking and compute
-* Kubernetes orchestration
+* Docker containerization
+* Docker Compose
+* Terraform Infrastructure as Code
+* AWS VPC and networking
 * Amazon EKS
-* Persistent PostgreSQL storage
-* Jenkins CI/CD automation
+* Kubernetes deployments and services
+* Persistent storage using EBS CSI
+* Jenkins CI/CD
 * Docker Hub image publishing
-* Kubernetes rolling deployments
-* Application health checks
-* Secrets and environment-variable management
-* Troubleshooting and operational workflows
+* Kubernetes-based application deployment
+* Environment variables and secret management
+* Health checks and rolling deployments
 
 ---
 
-#  Table of Contents
+# Table of Contents
 
-1. [Project Overview](#-project-overview)
-2. [Key Features](#-key-features)
-3. [System Architecture](#-system-architecture)
-4. [Architecture Components](#-architecture-components)
-5. [Technology Stack](#-technology-stack)
-6. [Project Workflow](#-project-workflow)
-7. [Application Data Flow](#-application-data-flow)
-8. [Repository Structure](#-repository-structure)
-9. [Prerequisites](#-prerequisites)
-10. [Local Development with Docker Compose](#-local-development-with-docker-compose)
-11. [Docker Architecture](#-docker-architecture)
-12. [AWS Infrastructure with Terraform](#-aws-infrastructure-with-terraform)
-13. [AWS Networking Architecture](#-aws-networking-architecture)
-14. [EC2 Infrastructure](#-ec2-infrastructure)
-15. [Amazon EKS](#-amazon-eks)
-16. [Kubernetes Architecture](#-kubernetes-architecture)
-17. [PostgreSQL Persistent Storage](#-postgresql-persistent-storage)
-18. [Jenkins CI/CD Pipeline](#-jenkins-cicd-pipeline)
-19. [Complete CI/CD Flow](#-complete-cicd-flow)
-20. [Environment Variables and Secrets](#-environment-variables-and-secrets)
-21. [Security Practices](#-security-practices)
-22. [Deployment Verification](#-deployment-verification)
-23. [Troubleshooting Guide](#-troubleshooting-guide)
-24. [Important Commands](#-important-commands)
-25. [Useful Kubernetes Commands](#-useful-kubernetes-commands)
-26. [Terraform Commands](#-terraform-commands)
-27. [AWS CLI Commands](#-aws-cli-commands)
-28. [Project Limitations](#-project-limitations)
-29. [Future Improvements](#-future-improvements)
-30. [Contributing](#-contributing)
-31. [Project Summary](#-project-summary)
-
----
-
-#  Project Overview
-
-## What is this Project?
-
-Cloud-Native Task Manager is a task-management web application deployed using modern DevOps practices.
-
-The application consists of three main runtime components:
-
-1. **Frontend**
-
-   * Static HTML/CSS/JavaScript application
-   * Served by Nginx
-   * Exposed on port `80`
-
-2. **Backend**
-
-   * Flask-based Python API
-   * Handles application logic and database operations
-   * Runs using Gunicorn
-   * Exposed internally on port `8888`
-
-3. **PostgreSQL**
-
-   * Relational database
-   * Stores application data
-   * Runs as a Kubernetes workload
-   * Uses persistent EBS-backed storage in AWS
-
-The application can run locally using Docker Compose and can be deployed to AWS EKS using Kubernetes.
+* [Project Overview](#project-overview)
+* [Architecture](#architecture)
+* [Architecture Components](#architecture-components)
+* [Technology Stack](#technology-stack)
+* [Application Overview](#application-overview)
+* [Complete Project Workflow](#complete-project-workflow)
+* [Repository Structure](#repository-structure)
+* [Prerequisites](#prerequisites)
+* [Run Application Locally](#run-application-locally)
+* [Docker Architecture](#docker-architecture)
+* [AWS Infrastructure with Terraform](#aws-infrastructure-with-terraform)
+* [AWS Network Architecture](#aws-network-architecture)
+* [EC2 Instance](#ec2-instance)
+* [Amazon EKS](#amazon-eks)
+* [Kubernetes Architecture](#kubernetes-architecture)
+* [PostgreSQL Persistent Storage](#postgresql-persistent-storage)
+* [Frontend and Backend Deployment](#frontend-and-backend-deployment)
+* [Kubernetes Services](#kubernetes-services)
+* [Ingress](#ingress)
+* [Jenkins CI/CD Pipeline](#jenkins-cicd-pipeline)
+* [Jenkins Pipeline Stages](#jenkins-pipeline-stages)
+* [Jenkins Credentials](#jenkins-credentials)
+* [Environment Variables](#environment-variables)
+* [Security Practices](#security-practices)
+* [Health Checks](#health-checks)
+* [Deployment Verification](#deployment-verification)
+* [Troubleshooting](#troubleshooting)
+* [Important Commands](#important-commands)
+* [Updating the Application](#updating-the-application)
+* [Destroying AWS Infrastructure](#destroying-aws-infrastructure)
+* [Current Project Scope](#current-project-scope)
+* [Limitations](#limitations)
+* [Future Improvements](#future-improvements)
+* [Current vs Production Architecture](#current-vs-production-architecture)
+* [Project Documentation](#project-documentation)
+* [Contributing](#contributing)
+* [Interview Explanation](#interview-explanation)
+* [Summary](#summary)
 
 ---
 
-#  Key Features
+# Project Overview
 
-### Application
+Cloud-Native Task Manager is a task management application consisting of:
 
-* Task management interface
-* User authentication
-* Task creation and management
-* Flask REST API
+* Flask backend
 * PostgreSQL database
-* Password hashing
-* Health endpoints
+* Static frontend served using Nginx
+* Docker containers
+* Docker Compose for local development
+* Terraform for AWS infrastructure
+* Kubernetes manifests for application deployment
+* Amazon EKS for Kubernetes orchestration
+* Jenkins for CI/CD automation
+* Docker Hub for container image storage
 
-### Containerization
+The project is designed as a practical DevOps project where the application is kept relatively simple while the main focus remains on infrastructure, containerization, Kubernetes, and CI/CD.
 
-* Separate frontend and backend Docker images
-* PostgreSQL container for local development
-* Docker Compose for local orchestration
-* Gunicorn application server
-* Nginx frontend server
-* Database startup handling
+---
 
-### Infrastructure
+# Architecture
 
-* AWS VPC
-* Public and private subnets
+```text
+                         Developer
+                             |
+                             |
+                         Git Push
+                             |
+                             v
+                     +----------------+
+                     |    GitHub      |
+                     +----------------+
+                             |
+                             |
+                             v
+                     +----------------+
+                     |    Jenkins     |
+                     |    CI/CD       |
+                     +----------------+
+                             |
+              +--------------+--------------+
+              |                             |
+              v                             v
+       Docker Build                  Docker Compose Test
+              |
+              v
+       +---------------+
+       |   Docker Hub  |
+       +---------------+
+              |
+              |
+              v
+       +-----------------------+
+       |      AWS / EKS        |
+       |                       |
+       |  +-----------------+  |
+       |  | Kubernetes      |  |
+       |  | Namespace       |  |
+       |  |                 |  |
+       |  | Frontend        |  |
+       |  | Backend         |  |
+       |  | PostgreSQL      |  |
+       |  +-----------------+  |
+       |                       |
+       +-----------------------+
+              |
+              v
+        Application Users
+```
+
+---
+
+# Architecture Components
+
+| Component          | Purpose                                  |
+| ------------------ | ---------------------------------------- |
+| GitHub             | Source code repository                   |
+| Flask              | Backend API                              |
+| PostgreSQL         | Application database                     |
+| Nginx              | Serves frontend and proxies API requests |
+| Docker             | Application containerization             |
+| Docker Compose     | Local multi-container environment        |
+| Terraform          | AWS infrastructure provisioning          |
+| AWS VPC            | Network isolation                        |
+| EC2                | General operational host                 |
+| Amazon EKS         | Managed Kubernetes cluster               |
+| Kubernetes         | Application orchestration                |
+| EBS CSI Driver     | Persistent EBS storage for PostgreSQL    |
+| Docker Hub         | Container image registry                 |
+| Jenkins            | CI/CD automation                         |
+| Kubernetes Secrets | Runtime secret configuration             |
+
+---
+
+# Technology Stack
+
+## Application
+
+* Python
+* Flask
+* Flask-SQLAlchemy
+* PostgreSQL
+* HTML
+* CSS
+* JavaScript
+
+## Containerization
+
+* Docker
+* Docker Compose
+* Gunicorn
+* Nginx
+
+## Infrastructure
+
+* AWS
+* Terraform
+* VPC
 * Internet Gateway
 * NAT Gateway
-* Route tables
-* EC2 instance
+* Route Tables
 * Security Groups
-* IAM roles
+* EC2
+* IAM
 * Amazon EKS
-* Managed EKS node group
+* EBS
 
-### Kubernetes
+## Kubernetes
 
-* Namespace isolation
+* Kubernetes
 * Deployments
 * Services
-* PostgreSQL persistent storage
-* StorageClass
+* Namespace
 * PersistentVolumeClaim
+* StorageClass
+* Secrets
 * Health probes
 * Resource requests and limits
-* RollingUpdate strategy
-* LoadBalancer service
+* Rolling updates
+* LoadBalancer Service
 * Optional Nginx Ingress
 
-### CI/CD
+## CI/CD
 
-* Jenkins pipeline
-* Docker image builds
-* Docker Compose integration testing
-* Docker Hub publishing
-* AWS EKS deployment
-* Kubernetes rollout verification
-* Build-number image tagging
+* Jenkins
+* Docker Hub
+* AWS CLI
+* kubectl
+* Docker Compose
 
 ---
 
-#  System Architecture
+# Application Overview
 
-## High-Level Architecture
+The application is a task management system.
 
-```text
-                         ┌──────────────────────┐
-                         │       Developer      │
-                         │   Code / Git Push    │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │       GitHub         │
-                         │   Source Repository  │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │       Jenkins        │
-                         │      CI/CD Server    │
-                         └──────────┬───────────┘
-                                    │
-                ┌───────────────────┼───────────────────┐
-                │                   │                   │
-                ▼                   ▼                   ▼
-        ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-        │ Docker Build  │   │ Docker Compose │   │ Docker Hub    │
-        │ Backend       │   │ Integration    │   │ Image Registry│
-        │ Frontend      │   │ Test           │   │               │
-        └───────────────┘   └───────────────┘   └───────┬───────┘
-                                                        │
-                                                        ▼
-                                           ┌──────────────────────┐
-                                           │      AWS EKS         │
-                                           │    Kubernetes         │
-                                           └──────────┬───────────┘
-                                                      │
-                         ┌────────────────────────────┼──────────────────────┐
-                         │                            │                      │
-                         ▼                            ▼                      ▼
-                ┌─────────────────┐        ┌─────────────────┐      ┌─────────────────┐
-                │ Frontend Pods   │        │ Backend Pod     │      │ PostgreSQL Pod  │
-                │ Nginx           │        │ Flask/Gunicorn  │      │ PostgreSQL 15   │
-                │ Port 80         │        │ Port 8888       │      │ Port 5432       │
-                └────────┬────────┘        └────────┬────────┘      └────────┬────────┘
-                         │                          │                         │
-                         │                          └──────────┬──────────────┘
-                         │                                     │
-                         ▼                                     ▼
-                ┌─────────────────┐                  ┌────────────────────┐
-                │ LoadBalancer    │                  │ EBS Persistent     │
-                │ Service         │                  │ Storage            │
-                └─────────────────┘                  └────────────────────┘
-```
+Users can manage tasks through the web application.
 
-Terraform provisions the AWS infrastructure required for EKS, networking, EC2, IAM, and security groups.
-
-Jenkins handles the application CI/CD workflow.
-
-Kubernetes handles application deployment and runtime orchestration.
-
----
-
-#  Architecture Components
-
-| Component               | Purpose                         | Technology            |
-| ----------------------- | ------------------------------- | --------------------- |
-| Frontend                | Web interface                   | HTML, CSS, JavaScript |
-| Web Server              | Serves frontend                 | Nginx                 |
-| Backend                 | REST API and application logic  | Flask/Python          |
-| Application Server      | Runs Flask application          | Gunicorn              |
-| Database                | Persistent application data     | PostgreSQL 15         |
-| Containerization        | Package applications            | Docker                |
-| Local Orchestration     | Run services locally            | Docker Compose        |
-| Infrastructure          | Provision AWS resources         | Terraform             |
-| Cloud                   | Infrastructure platform         | AWS                   |
-| Container Orchestration | Run containers                  | Kubernetes            |
-| Kubernetes Platform     | Managed Kubernetes              | Amazon EKS            |
-| Image Registry          | Store Docker images             | Docker Hub            |
-| CI/CD                   | Build and deployment automation | Jenkins               |
-| Persistent Storage      | PostgreSQL storage              | Amazon EBS / EBS CSI  |
-
----
-
-#  Technology Stack
-
-## Backend
+The application consists of:
 
 ```text
-Language:          Python 3.11
-Framework:         Flask 3.0.0
-ORM:               Flask-SQLAlchemy / SQLAlchemy
-Database Driver:   psycopg2-binary
-Application Server: Gunicorn
-CORS:              Flask-CORS
-Configuration:     python-dotenv
-```
-
-The current backend dependencies include Flask, Flask-SQLAlchemy, Flask-CORS, python-dotenv, SQLAlchemy, Werkzeug, psycopg2-binary, and Gunicorn.
-
-## Frontend
-
-```text
-HTML5
-CSS3
-JavaScript
+Frontend
+   |
+   | HTTP
+   v
 Nginx
+   |
+   | /api/
+   v
+Flask Backend
+   |
+   | SQL
+   v
+PostgreSQL
 ```
 
-## DevOps and Infrastructure
+The backend provides API endpoints for application functionality and health checking.
+
+The frontend is served as static content through Nginx.
+
+Nginx also proxies API requests to the Flask backend.
+
+---
+
+# Complete Project Workflow
+
+The complete DevOps workflow is:
 
 ```text
-Docker
-Docker Compose
-Kubernetes
-Amazon EKS
-Terraform
-Jenkins
-Docker Hub
-AWS CLI
-kubectl
-```
-
-## AWS Services
-
-```text
-Amazon VPC
-Internet Gateway
-NAT Gateway
-Elastic IP
-EC2
-Amazon EKS
-EKS Managed Node Group
-IAM
-Security Groups
-Amazon EBS
-EBS CSI Driver
+1. Developer changes application code
+              |
+              v
+2. Push code to GitHub
+              |
+              v
+3. Jenkins starts pipeline
+              |
+              v
+4. Build backend Docker image
+              |
+              v
+5. Build frontend Docker image
+              |
+              v
+6. Start application using Docker Compose
+              |
+              v
+7. Run basic health checks
+              |
+              v
+8. Push images to Docker Hub
+              |
+              v
+9. Configure AWS EKS access
+              |
+              v
+10. Ensure EBS CSI add-on is available
+              |
+              v
+11. Create/update Kubernetes Secrets
+              |
+              v
+12. Deploy PostgreSQL
+              |
+              v
+13. Wait for PostgreSQL rollout
+              |
+              v
+14. Deploy backend and frontend
+              |
+              v
+15. Update deployments with new image tags
+              |
+              v
+16. Wait for Kubernetes rollouts
+              |
+              v
+17. Verify pods and services
 ```
 
 ---
 
-#  Project Workflow
-
-## Complete End-to-End Workflow
-
-```text
-Developer
-    │
-    │ git push
-    ▼
-GitHub
-    │
-    │ Jenkins checkout
-    ▼
-Jenkins
-    │
-    ├── Checkout
-    │
-    ├── Build Docker Images
-    │
-    ├── Docker Compose Test
-    │
-    ├── Push Images to Docker Hub
-    │
-    └── Deploy to EKS
-              │
-              ▼
-        Kubernetes Cluster
-              │
-       ┌──────┼───────┐
-       ▼      ▼       ▼
-   Frontend Backend PostgreSQL
-```
-
----
-
-#  Jenkins Pipeline Workflow
-
-The current Jenkins pipeline contains five main stages:
-
-```text
-Stage 1 → Checkout
-Stage 2 → Build Images
-Stage 3 → Test with Docker Compose
-Stage 4 → Push Images
-Stage 5 → Deploy to EKS
-```
-
-## Stage 1 – Checkout
-
-Jenkins checks out the source code configured by the Jenkins SCM job.
-
-```groovy
-checkout scm
-```
-
-This ensures the pipeline works with the current repository contents.
-
----
-
-## Stage 2 – Build Images
-
-Jenkins builds two Docker images:
-
-```text
-Backend:
-<namespace>/taskmanager-backend:<BUILD_NUMBER>
-
-Frontend:
-<namespace>/taskmanager-frontend:<BUILD_NUMBER>
-```
-
-The build number is used as the image tag rather than relying only on `latest`.
-
-Example:
-
-```text
-taskmanager-backend:15
-taskmanager-frontend:15
-```
-
-This makes each Jenkins build identifiable.
-
----
-
-## Stage 3 – Test with Docker Compose
-
-Jenkins starts the complete local application stack:
-
-```bash
-docker compose up -d --build
-```
-
-The pipeline then checks:
-
-```text
-Backend:
-http://localhost:8888/api/health
-
-Frontend:
-http://localhost/
-```
-
-The backend health endpoint is retried until it becomes available.
-
-The pipeline cleans up the temporary Compose environment after the stage.
-
----
-
-## Stage 4 – Push Images
-
-Jenkins authenticates to Docker Hub using Jenkins credentials.
-
-The password is passed through standard input:
-
-```bash
-printf '%s' "$DOCKER_PASS" | docker login \
-  -u "$DOCKER_USER" \
-  --password-stdin
-```
-
-Then both images are pushed:
-
-```bash
-docker push <namespace>/taskmanager-backend:$BUILD_NUMBER
-docker push <namespace>/taskmanager-frontend:$BUILD_NUMBER
-```
-
----
-
-## Stage 5 – Deploy to EKS
-
-Jenkins first configures Kubernetes access:
-
-```bash
-aws eks update-kubeconfig \
-  --name "$EKS_CLUSTER_NAME" \
-  --region "$AWS_REGION"
-```
-
-Then it applies the Kubernetes resources.
-
-The pipeline also ensures that the AWS EBS CSI add-on exists because PostgreSQL requires persistent EBS-backed storage.
-
-After that:
-
-```text
-Namespace
-   ↓
-StorageClass
-   ↓
-Secrets
-   ↓
-PostgreSQL PVC
-   ↓
-PostgreSQL Deployment
-   ↓
-Backend Deployment
-   ↓
-Frontend Deployment
-   ↓
-Ingress
-   ↓
-Update Docker images
-   ↓
-Wait for rollouts
-```
-
----
-
-#  Application Data Flow
-
-```text
-                    USER
-                     │
-                     │ HTTP
-                     ▼
-             ┌───────────────┐
-             │    Nginx      │
-             │   Frontend    │
-             │    :80        │
-             └───────┬───────┘
-                     │
-                     │ /api
-                     ▼
-             ┌───────────────┐
-             │ Flask Backend │
-             │   Gunicorn    │
-             │    :8888      │
-             └───────┬───────┘
-                     │
-                     │ SQL
-                     ▼
-             ┌───────────────┐
-             │  PostgreSQL   │
-             │    :5432      │
-             └───────────────┘
-```
-
-The frontend is served by Nginx.
-
-API requests are handled by the Flask backend.
-
-The backend communicates with PostgreSQL.
-
----
-
-#  Repository Structure
+# Repository Structure
 
 ```text
 cloud-native-task-manager/
 │
 ├── backend/
 │   ├── app/
-│   │   ├── ...
-│   │
 │   ├── static/
 │   ├── templates/
-│   ├── Dockerfile
-│   ├── requirements.txt
+│   ├── __init__.py
+│   ├── models.py
+│   ├── routes.py
 │   ├── run.py
+│   ├── requirements.txt
+│   ├── Dockerfile
 │   ├── wait-for-db.sh
 │   └── .dockerignore
 │
 ├── frontend/
-│   ├── ...
+│   ├── css/
+│   ├── js/
+│   ├── html files
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   └── .dockerignore
 │
 ├── k8s/
 │   ├── namespace.yaml
-│   ├── storage-class.yaml
-│   ├── postgres-pvc.yaml
 │   ├── postgres-deployment.yaml
+│   ├── postgres-pvc.yaml
+│   ├── storage-class.yaml
 │   ├── backend-deployment.yaml
 │   ├── frontend-deployment.yaml
-│   └── ingress.yaml
+│   ├── ingress.yaml
+│   └── load-generator.yaml
 │
 ├── terraform/
 │   ├── provider.tf
@@ -539,109 +350,113 @@ cloud-native-task-manager/
 │   ├── eks.tf
 │   ├── terraform.tfvars.example
 │   ├── README.md
-│   └── keys/
+│   └── .terraform.lock.hcl
 │
 ├── jenkins/
 │   └── jenkins-deployment.yaml
 │
-├── Jenkinsfile
 ├── docker-compose.yml
+├── Jenkinsfile
 ├── .env.example
 ├── .gitignore
+├── .dockerignore
 ├── DEVOPS-FILES-EXPLAINED.md
 ├── INTERVIEW-PROJECT-EXPLANATION.md
-└── PROJECT-QUESTION-BANK.md
+├── PROJECT-QUESTION-BANK.md
+└── README.md
 ```
 
 ---
 
-#  Prerequisites
+# Prerequisites
 
-## Local Machine
+Before running the complete project, install:
 
-Install:
+## Local Development
 
-```text
-Git
-Docker
-Docker Compose v2
-Python 3.11+
-AWS CLI
-kubectl
-Terraform 1.5+
-```
+* Git
+* Docker
+* Docker Compose
+* Python
+* Node.js if required for frontend development
 
-For Jenkins deployment, the Jenkins agent additionally needs:
+## AWS
 
-```text
-Docker
-Docker Compose v2
-AWS CLI
-kubectl
-curl
-```
+* AWS account
+* AWS CLI
+* Configured AWS credentials
+* IAM permissions for required AWS resources
+
+## Infrastructure
+
+* Terraform
+* kubectl
+
+## CI/CD
+
+* Jenkins
+* Docker Hub account
+* Jenkins Docker support
+* Jenkins AWS credentials
+* Jenkins Kubernetes deployment access
 
 ---
 
-#  Local Development with Docker Compose
+# Run Application Locally
 
-## Quick Start
+The easiest way to run the complete application locally is Docker Compose.
 
-Clone the repository:
+## Clone Repository
 
 ```bash
-git clone https://github.com/shravanipatil35/cloud-native-task-manager.git
+git clone <repository-url>
 cd cloud-native-task-manager
 ```
 
-Create the environment file:
+## Configure Environment
+
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Set:
+Update the values according to your local environment.
 
-```text
-POSTGRES_PASSWORD=<your-password>
-SECRET_KEY=<your-random-secret>
-```
-
-A secure Flask secret can be generated with:
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(48))"
-```
-
-Do not commit `.env`.
+Do not commit `.env` files containing real credentials.
 
 ---
 
-## Start the Application
+# Start with Docker Compose
+
+Run:
 
 ```bash
 docker compose up --build
 ```
 
-The local architecture is:
+This starts:
 
 ```text
-Frontend
-localhost:80
-     │
-     ▼
-Backend
-localhost:8888
-     │
-     ▼
 PostgreSQL
-localhost:5432
+    |
+    v
+Backend
+    |
+    v
+Frontend / Nginx
 ```
 
-Open:
+The frontend is available on:
 
 ```text
 http://localhost
+```
+
+The backend runs on:
+
+```text
+http://localhost:8888
 ```
 
 Backend health endpoint:
@@ -650,273 +465,1199 @@ Backend health endpoint:
 http://localhost:8888/api/health
 ```
 
----
-
-## Check Running Containers
-
-```bash
-docker compose ps
-```
-
----
-
-## View Logs
-
-All services:
-
-```bash
-docker compose logs -f
-```
-
-Backend:
-
-```bash
-docker compose logs -f backend
-```
-
-Frontend:
-
-```bash
-docker compose logs -f frontend
-```
-
-PostgreSQL:
-
-```bash
-docker compose logs -f postgres
-```
-
----
-
-## Stop the Application
+Stop the application:
 
 ```bash
 docker compose down
 ```
 
-The named PostgreSQL volume is retained.
-
-To remove the database volume:
+Remove containers and database volume:
 
 ```bash
-docker compose down -v
+docker compose down --volumes
 ```
-
-Use `-v` only when intentionally deleting local PostgreSQL data.
 
 ---
 
-#  Docker Architecture
+# Docker Architecture
 
-## Backend Dockerfile
+The application uses three main containers locally.
 
-The backend uses:
-
-```dockerfile
-FROM python:3.11-slim
+```text
++-----------------------+
+|      PostgreSQL       |
+|       Port 5432       |
++-----------+-----------+
+            |
+            |
++-----------v-----------+
+|    Flask Backend      |
+|       Port 8888       |
+|       Gunicorn        |
++-----------+-----------+
+            |
+            |
++-----------v-----------+
+|     Nginx Frontend    |
+|        Port 80        |
++-----------------------+
 ```
 
-The Dockerfile:
+## Backend Container
 
-1. Creates `/app`
-2. Installs Python dependencies
-3. Copies application code
-4. Installs `netcat-openbsd`
-5. Adds the database wait script
-6. Exposes port `8888`
-7. Starts through `wait-for-db.sh`
+The backend Docker image is based on:
 
-The application is ultimately served using Gunicorn.
+```text
+python:3.11-slim
+```
 
----
+The application is served using Gunicorn.
 
-## Frontend Dockerfile
+The backend container waits for PostgreSQL to become available before starting the application.
+
+## Frontend Container
 
 The frontend uses:
 
-```dockerfile
-FROM nginx:alpine
-```
-
-The static frontend is copied to:
-
 ```text
-/usr/share/nginx/html
+nginx:alpine
 ```
 
-The custom Nginx configuration is copied to:
+Nginx:
 
-```text
-/etc/nginx/conf.d/default.conf
-```
-
-Nginx listens on:
-
-```text
-Port 80
-```
+* Serves frontend files
+* Handles frontend routes
+* Proxies `/api/` requests to the backend
 
 ---
 
-#  Docker Compose Architecture
+# AWS Infrastructure with Terraform
 
-The Compose file defines three services:
+Terraform is used to provision the AWS infrastructure.
 
-```text
-postgres
-backend
-frontend
-```
+The infrastructure includes:
 
-## PostgreSQL
+* VPC
+* Public subnets
+* Private subnets
+* Internet Gateway
+* NAT Gateway
+* Route tables
+* Security groups
+* EC2 instance
+* IAM roles
+* Amazon EKS cluster
+* EKS managed node group
 
-```yaml
-image: postgres:15-alpine
-```
+---
 
-It uses the named volume:
+# Terraform Configuration
 
-```text
-postgres_data
-```
-
-mounted at:
-
-```text
-/var/lib/postgresql/data
-```
-
-A PostgreSQL health check uses:
+Navigate to the Terraform directory:
 
 ```bash
-pg_isready
+cd terraform
+```
+
+Initialize Terraform:
+
+```bash
+terraform init
+```
+
+Create your configuration file:
+
+```bash
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Update:
+
+* AWS region
+* EC2 AMI ID
+* EKS version
+* Availability Zones
+* EKS public API CIDR
+* SSH public key
+* allowed SSH CIDRs if required
+
+---
+
+# Terraform Validation
+
+Format Terraform files:
+
+```bash
+terraform fmt -recursive
+```
+
+Validate configuration:
+
+```bash
+terraform validate
+```
+
+Review infrastructure changes:
+
+```bash
+terraform plan
+```
+
+Apply infrastructure:
+
+```bash
+terraform apply
+```
+
+Terraform creates the AWS infrastructure required for the Kubernetes deployment.
+
+---
+
+# AWS Network Architecture
+
+The VPC uses:
+
+```text
+VPC
+10.0.0.0/16
+│
+├── Public Subnets
+│   ├── Public Subnet 1
+│   ├── Public Subnet 2
+│   └── Public Subnet 3
+│
+├── Private Subnets
+│   ├── Private Subnet 1
+│   ├── Private Subnet 2
+│   └── Private Subnet 3
+│
+├── Internet Gateway
+│
+└── NAT Gateway
+```
+
+The public subnets provide internet-facing connectivity.
+
+The private subnets are used for EKS worker nodes.
+
+The NAT Gateway allows resources in private subnets to access the internet for outbound communication without requiring public IP addresses.
+
+---
+
+# Security Groups
+
+The EC2 security group controls access to the operational host.
+
+SSH access is configurable using:
+
+```text
+allowed_ssh_cidrs
+```
+
+By default, this list is empty.
+
+This prevents accidentally exposing SSH access before an administrator explicitly configures an allowed CIDR.
+
+The security group allows outbound traffic.
+
+---
+
+# EC2 Instance
+
+Terraform provisions an EC2 instance in a public subnet.
+
+The instance is configured with:
+
+* Docker
+* kubectl
+* AWS CLI
+
+The EC2 instance is intended as a general operational host.
+
+It is not required to run the Jenkins controller.
+
+Jenkins can optionally be deployed inside Kubernetes using the provided Jenkins Kubernetes manifest.
+
+The EC2 instance receives a public IP because it is deployed in a public subnet with public IP association enabled.
+
+---
+
+# Amazon EKS
+
+The project uses Amazon EKS as the Kubernetes control plane.
+
+The EKS cluster contains a managed node group.
+
+Default configuration includes:
+
+```text
+Desired nodes: 2
+Minimum nodes: 1
+Maximum nodes: 4
+Instance type: t3.medium
+```
+
+The managed node group runs in private subnets.
+
+---
+
+# EKS IAM Roles
+
+Terraform creates IAM roles for:
+
+## EKS Cluster
+
+The EKS cluster role provides permissions required by the EKS control plane.
+
+## EKS Worker Nodes
+
+Worker nodes use an IAM role with permissions including:
+
+* AmazonEKSWorkerNodePolicy
+* AmazonEKS_CNI_Policy
+* AmazonEBSCSIDriverPolicy
+
+These permissions allow the worker nodes and storage components to operate correctly.
+
+---
+
+# EKS API Access
+
+The Kubernetes API endpoint is configured with:
+
+```text
+Private access: enabled
+Public access: enabled
+```
+
+Public access is restricted using:
+
+```text
+eks_public_access_cidrs
+```
+
+The CIDR should be replaced with the administrator's required public IP or network range.
+
+Do not use unrestricted public access for a real production environment unless there is a specific security reason.
+
+---
+
+# Kubernetes Architecture
+
+The Kubernetes deployment uses a dedicated namespace:
+
+```text
+taskmanager
+```
+
+The application architecture is:
+
+```text
+                 LoadBalancer
+                      |
+                      v
+               +-------------+
+               |  Frontend   |
+               |  Nginx      |
+               +------+------+
+                      |
+                    /api
+                      |
+                      v
+               +-------------+
+               |   Backend   |
+               |    Flask    |
+               +------+------+
+                      |
+                      v
+               +-------------+
+               | PostgreSQL  |
+               +------+------+
+                      |
+                      v
+               EBS Persistent Storage
 ```
 
 ---
+
+# Kubernetes Resources
+
+The project uses the following Kubernetes resources:
+
+* Namespace
+* Deployments
+* Services
+* PersistentVolumeClaim
+* StorageClass
+* Secrets
+* Health probes
+* Resource requests and limits
+* Optional Ingress
+
+---
+
+# Namespace
+
+All application resources are deployed into:
+
+```text
+taskmanager
+```
+
+Create the namespace manually:
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+```
+
+Check:
+
+```bash
+kubectl get namespace
+```
+
+---
+
+# PostgreSQL Persistent Storage
+
+PostgreSQL uses persistent storage.
+
+The project defines a:
+
+```text
+StorageClass
+```
+
+using:
+
+```text
+EBS CSI Driver
+```
+
+The storage class uses:
+
+```text
+gp3
+```
+
+and:
+
+```text
+WaitForFirstConsumer
+```
+
+This allows Kubernetes to provision the EBS volume in a suitable Availability Zone when the PostgreSQL pod is scheduled.
+
+---
+
+# PostgreSQL PVC
+
+The PostgreSQL PersistentVolumeClaim requests:
+
+```text
+5Gi
+```
+
+with:
+
+```text
+ReadWriteOnce
+```
+
+The PVC is mounted by the PostgreSQL pod.
+
+This prevents database data from being stored only inside the container filesystem.
+
+---
+
+# PostgreSQL Deployment
+
+The project uses:
+
+```text
+postgres:15-alpine
+```
+
+PostgreSQL runs as a single replica.
+
+The database has:
+
+* Persistent storage
+* Database password from Kubernetes Secret
+* Readiness probe
+* Liveness probe
+* Resource requests
+* Resource limits
+
+---
+
+# Backend Deployment
+
+The backend runs as a Kubernetes Deployment.
+
+Default configuration:
+
+```text
+Replicas: 1
+Port: 8888
+```
+
+The backend uses:
+
+```text
+Gunicorn
+```
+
+for serving the Flask application.
+
+Environment configuration includes:
+
+```text
+FLASK_ENV
+DATABASE_HOST
+DATABASE_NAME
+DATABASE_USER
+DATABASE_PASSWORD
+SECRET_KEY
+```
+
+Sensitive values are supplied through Kubernetes Secrets.
+
+The backend also has:
+
+* Startup probe
+* Readiness probe
+* Liveness probe
+* Resource requests
+* Resource limits
+* Rolling update configuration
+
+---
+
+# Frontend Deployment
+
+The frontend runs using Nginx.
+
+Default configuration:
+
+```text
+Replicas: 2
+Port: 80
+```
+
+The frontend deployment includes:
+
+* Readiness probe
+* Liveness probe
+* Resource requests
+* Resource limits
+* Rolling update configuration
+
+Two replicas provide basic availability during rolling deployments.
+
+---
+
+# Kubernetes Services
+
+The project uses three main services.
+
+## Frontend Service
+
+Type:
+
+```text
+LoadBalancer
+```
+
+Port:
+
+```text
+80
+```
+
+This provides external access to the frontend through the AWS load balancer created by Kubernetes.
+
+## Backend Service
+
+Type:
+
+```text
+ClusterIP
+```
+
+Port:
+
+```text
+8888
+```
+
+The backend is intended to be accessed internally by other Kubernetes resources.
+
+## PostgreSQL Service
+
+Type:
+
+```text
+ClusterIP
+```
+
+Port:
+
+```text
+5432
+```
+
+The backend communicates with PostgreSQL through the Kubernetes service.
+
+---
+
+# Ingress
+
+The project also includes an optional Nginx Ingress configuration.
+
+The configured hostname is:
+
+```text
+taskmanager.local
+```
+
+Routes include:
+
+```text
+/
+```
+
+to the frontend service.
+
+And:
+
+```text
+/api
+```
+
+to the backend service.
+
+The Ingress manifest is optional and requires an Nginx Ingress Controller to already exist in the cluster.
+
+The default frontend `LoadBalancer` service can be used without the optional Ingress controller.
+
+---
+
+# Kubernetes Deployment Order
+
+A typical deployment order is:
+
+```text
+1. Namespace
+       |
+       v
+2. StorageClass
+       |
+       v
+3. Kubernetes Secrets
+       |
+       v
+4. PostgreSQL PVC
+       |
+       v
+5. PostgreSQL Deployment
+       |
+       v
+6. Backend Deployment
+       |
+       v
+7. Frontend Deployment
+       |
+       v
+8. Services
+       |
+       v
+9. Optional Ingress
+```
+
+The Jenkins pipeline automates the required deployment sequence.
+
+---
+
+# Jenkins CI/CD Pipeline
+
+The project uses Jenkins for CI/CD.
+
+The Jenkins pipeline performs:
+
+```text
+Checkout
+   |
+   v
+Build Docker Images
+   |
+   v
+Docker Compose Integration Test
+   |
+   v
+Push Images to Docker Hub
+   |
+   v
+Deploy to Amazon EKS
+```
+
+---
+
+# Jenkins Pipeline Stages
+
+## Stage 1 – Checkout
+
+Jenkins checks out the source code from GitHub.
+
+---
+
+## Stage 2 – Build Images
+
+Jenkins builds:
+
+```text
+Backend Docker Image
+Frontend Docker Image
+```
+
+Images are tagged using the Jenkins build number.
+
+Example:
+
+```text
+username/taskmanager-backend:15
+username/taskmanager-frontend:15
+```
+
+Using the Jenkins build number gives every pipeline build a unique image tag.
+
+---
+
+# Stage 3 – Test with Docker Compose
+
+Jenkins starts the application using Docker Compose.
+
+The pipeline:
+
+1. Starts PostgreSQL
+2. Starts backend
+3. Starts frontend
+4. Waits for the backend
+5. Checks the backend health endpoint
+6. Checks the frontend
+7. Cleans up the containers
+
+Backend health endpoint:
+
+```text
+/api/health
+```
+
+This provides a basic integration/smoke test before pushing the images.
+
+---
+
+# Stage 4 – Push Images
+
+After successful testing, Jenkins authenticates with Docker Hub.
+
+The backend and frontend images are pushed using the Jenkins build number.
+
+Example:
+
+```text
+DOCKERHUB_NAMESPACE/taskmanager-backend:BUILD_NUMBER
+DOCKERHUB_NAMESPACE/taskmanager-frontend:BUILD_NUMBER
+```
+
+---
+
+# Stage 5 – Deploy to EKS
+
+Jenkins uses AWS credentials to configure access to EKS.
+
+The pipeline runs:
+
+```bash
+aws eks update-kubeconfig
+```
+
+It then:
+
+1. Applies the Kubernetes namespace
+2. Checks for the EBS CSI add-on
+3. Creates it if required
+4. Waits for the add-on to become active
+5. Applies the StorageClass
+6. Creates/updates Kubernetes Secrets
+7. Deploys PostgreSQL
+8. Waits for PostgreSQL
+9. Deploys backend
+10. Deploys frontend
+11. Updates backend image
+12. Updates frontend image
+13. Waits for rollouts
+14. Displays pods and services
+
+---
+
+# Jenkins Image Deployment
+
+The Kubernetes deployment initially contains baseline image references.
+
+Jenkins updates the running deployment using:
+
+```bash
+kubectl set image
+```
+
+For example:
+
+```bash
+kubectl set image deployment/taskmanager-backend \
+backend=DOCKERHUB_NAMESPACE/taskmanager-backend:BUILD_NUMBER
+```
+
+This allows each Jenkins build to deploy a specific image version.
+
+---
+
+# Jenkins Credentials
+
+The Jenkins pipeline expects credentials with the following IDs:
+
+```text
+dockerhub-credentials
+aws-credentials
+taskmanager-db-password
+taskmanager-app-secret-key
+```
+
+## dockerhub-credentials
+
+Used for authenticating with Docker Hub.
+
+## aws-credentials
+
+Used by Jenkins to access AWS and configure EKS access.
+
+## taskmanager-db-password
+
+Used to configure the PostgreSQL database password.
+
+## taskmanager-app-secret-key
+
+Used as the Flask application secret key.
+
+Credentials should be stored in Jenkins Credentials Manager rather than directly inside the Jenkinsfile.
+
+---
+
+# Jenkins Build Parameters
+
+The pipeline supports parameters including:
+
+```text
+DOCKERHUB_NAMESPACE
+AWS_REGION
+EKS_CLUSTER_NAME
+```
+
+Example defaults include:
+
+```text
+AWS_REGION=us-east-1
+EKS_CLUSTER_NAME=taskmanager-eks
+```
+
+These values can be changed through Jenkins build parameters.
+
+---
+
+# Optional Jenkins Deployment Inside Kubernetes
+
+The repository includes an optional Jenkins deployment manifest.
+
+The Jenkins controller:
+
+* Runs inside Kubernetes
+* Uses a persistent volume
+* Uses a ClusterIP service
+* Does not expose Jenkins directly through a public LoadBalancer
+* Does not automatically mount a Kubernetes service-account token
+
+The Jenkins deployment uses the project's EBS-backed storage class.
+
+Before deploying Jenkins, the EBS CSI driver must be available.
+
+To access Jenkins locally through port forwarding:
+
+```bash
+kubectl port-forward -n jenkins svc/jenkins 8080:8080
+```
+
+Then access Jenkins through:
+
+```text
+localhost:8080
+```
+
+This Jenkins deployment is optional. Jenkins can also be hosted separately.
+
+---
+
+# Environment Variables
+
+The project avoids placing application secrets directly in source code.
+
+Common configuration values include:
+
+```text
+POSTGRES_USER
+POSTGRES_DB
+POSTGRES_PASSWORD
+DATABASE_HOST
+DATABASE_PORT
+DATABASE_NAME
+DATABASE_USER
+DATABASE_PASSWORD
+SECRET_KEY
+```
+
+For local development, configuration can be supplied through `.env`.
+
+For Kubernetes deployment, sensitive values are supplied through Kubernetes Secrets.
+
+---
+
+# Kubernetes Secrets
+
+The Jenkins pipeline creates or updates Kubernetes Secrets during deployment.
+
+Secrets are used for values such as:
+
+```text
+Database password
+Application secret key
+```
+
+This prevents passwords and secret keys from being hardcoded directly inside deployment manifests.
+
+---
+
+# Security Practices
+
+The project includes several basic security practices.
+
+## Secrets
+
+Sensitive values are not committed directly into the repository.
+
+Example configuration files use placeholders.
+
+---
+
+## Kubernetes Service Account Tokens
+
+Application pods disable automatic service-account-token mounting where it is not required.
+
+Example:
+
+```yaml
+automountServiceAccountToken: false
+```
+
+This follows the principle of reducing unnecessary Kubernetes API access.
+
+---
+
+## EKS API Access
+
+The EKS public API endpoint is restricted using configurable CIDRs.
+
+The example configuration contains a documentation placeholder that must be replaced with the administrator's actual IP or network range.
+
+---
+
+## Security Groups
+
+SSH access to the EC2 instance is controlled using:
+
+```text
+allowed_ssh_cidrs
+```
+
+The default value is empty.
+
+---
+
+## Container Images
+
+The Docker images use lightweight base images:
+
+```text
+python:3.11-slim
+nginx:alpine
+postgres:15-alpine
+```
+
+The project keeps the Dockerfiles simple and focused on the application's actual requirements.
+
+---
+
+# Health Checks
+
+Health checks are used at multiple levels.
 
 ## Backend
 
-The backend is built from:
+The backend provides:
 
 ```text
-./backend
+/api/health
 ```
 
-It connects to PostgreSQL using:
+and:
 
 ```text
-DB_HOST=postgres
+/api/ready
 ```
 
-This works because Docker Compose provides internal DNS using service names.
+These endpoints are used by Kubernetes probes.
+
+---
+
+## PostgreSQL
+
+PostgreSQL uses:
+
+```text
+pg_isready
+```
+
+for readiness and liveness checks.
 
 ---
 
 ## Frontend
 
-The frontend is built from:
-
-```text
-./frontend
-```
-
-and exposed through:
-
-```text
-80:80
-```
+The frontend uses the Nginx root endpoint for readiness and liveness checks.
 
 ---
 
-#  AWS Infrastructure with Terraform
+# Kubernetes Resource Management
 
-Terraform provisions the AWS infrastructure.
+The application deployments define Kubernetes resource requests and limits.
 
-The current Terraform configuration includes:
+Example concept:
 
 ```text
-VPC
-Internet Gateway
-Public Subnets
-Private Subnets
-NAT Gateway
-Elastic IP
-Route Tables
-Security Group
-EC2
-IAM Roles
-EKS Cluster
-EKS Managed Node Group
+Requests
+   |
+   +-- CPU
+   +-- Memory
+
+Limits
+   |
+   +-- CPU
+   +-- Memory
 ```
 
-Terraform uses reusable variables rather than embedding environment-specific AWS values directly into the infrastructure code.
+This helps Kubernetes schedule workloads and prevents individual containers from consuming unlimited resources.
 
 ---
 
-#  Terraform Files
+# Rolling Updates
 
-## `provider.tf`
+Backend and frontend deployments use Kubernetes rolling update strategies.
 
-Defines:
+The goal is to replace old pods gradually rather than deleting all application pods at once.
 
-* Terraform version requirement
-* AWS provider
-* AWS region
-* Default resource tags
-
-Example tags:
+The deployment strategy uses:
 
 ```text
-Project
-Environment
-ManagedBy
+maxUnavailable
+maxSurge
 ```
 
-Remote S3 state configuration is documented as an optional configuration for shared environments.
+This provides basic zero-downtime-style deployment behavior for the application layer.
 
 ---
 
-## `variables.tf`
+# Deployment Verification
 
-Important variables include:
-
-```text
-project_name
-environment
-aws_region
-vpc_cidr
-public_subnet_cidrs
-private_subnet_cidrs
-availability_zones
-
-ec2_ami_id
-ec2_instance_type
-ec2_key_pair_name
-ec2_volume_size
-
-eks_cluster_name
-eks_cluster_version
-eks_public_access_cidrs
-
-eks_node_instance_types
-eks_node_desired
-eks_node_min
-eks_node_max
-
-allowed_ssh_cidrs
-```
-
-The configuration requires at least two Availability Zones for EKS.
-
----
-
-#  Terraform Deployment
-
-Go to:
+After deployment:
 
 ```bash
-cd terraform
+kubectl get pods -n taskmanager
 ```
+
+Check services:
+
+```bash
+kubectl get svc -n taskmanager
+```
+
+Check deployments:
+
+```bash
+kubectl get deployments -n taskmanager
+```
+
+Check PVC:
+
+```bash
+kubectl get pvc -n taskmanager
+```
+
+Check StorageClass:
+
+```bash
+kubectl get storageclass
+```
+
+Check pod details:
+
+```bash
+kubectl describe pod <pod-name> -n taskmanager
+```
+
+Check logs:
+
+```bash
+kubectl logs <pod-name> -n taskmanager
+```
+
+---
+
+# Important Kubernetes Commands
+
+## Cluster Information
+
+```bash
+kubectl cluster-info
+```
+
+```bash
+kubectl get nodes
+```
+
+---
+
+## Pods
+
+```bash
+kubectl get pods -n taskmanager
+```
+
+```bash
+kubectl get pods -n taskmanager -o wide
+```
+
+---
+
+## Deployments
+
+```bash
+kubectl get deployments -n taskmanager
+```
+
+```bash
+kubectl rollout status deployment/taskmanager-backend -n taskmanager
+```
+
+```bash
+kubectl rollout status deployment/taskmanager-frontend -n taskmanager
+```
+
+---
+
+## Services
+
+```bash
+kubectl get svc -n taskmanager
+```
+
+---
+
+## Logs
+
+```bash
+kubectl logs deployment/taskmanager-backend -n taskmanager
+```
+
+```bash
+kubectl logs deployment/taskmanager-frontend -n taskmanager
+```
+
+---
+
+## Describe Resources
+
+```bash
+kubectl describe pod <pod-name> -n taskmanager
+```
+
+```bash
+kubectl describe deployment taskmanager-backend -n taskmanager
+```
+
+---
+
+## Storage
+
+```bash
+kubectl get pvc -n taskmanager
+```
+
+```bash
+kubectl get pv
+```
+
+```bash
+kubectl get storageclass
+```
+
+---
+
+# AWS and EKS Commands
+
+Configure AWS credentials:
+
+```bash
+aws configure
+```
+
+Check AWS identity:
+
+```bash
+aws sts get-caller-identity
+```
+
+Update EKS kubeconfig:
+
+```bash
+aws eks update-kubeconfig \
+  --region <region> \
+  --name <cluster-name>
+```
+
+Check EKS clusters:
+
+```bash
+aws eks list-clusters
+```
+
+Check node groups:
+
+```bash
+aws eks list-nodegroups \
+  --cluster-name <cluster-name>
+```
+
+---
+
+# Terraform Commands
 
 Initialize:
 
@@ -927,7 +1668,7 @@ terraform init
 Format:
 
 ```bash
-terraform fmt
+terraform fmt -recursive
 ```
 
 Validate:
@@ -936,7 +1677,7 @@ Validate:
 terraform validate
 ```
 
-Review the infrastructure:
+Plan:
 
 ```bash
 terraform plan
@@ -948,1188 +1689,26 @@ Apply:
 terraform apply
 ```
 
-Destroy when finished:
+Destroy:
 
 ```bash
 terraform destroy
 ```
 
-Always review the Terraform plan before applying or destroying infrastructure.
-
 ---
 
-#  AWS Networking Architecture
+# Docker Commands
 
-The project uses a VPC with:
-
-```text
-VPC
-├── Public Subnet 1
-├── Public Subnet 2
-├── Public Subnet 3
-│
-├── Private Subnet 1
-├── Private Subnet 2
-└── Private Subnet 3
-```
-
-The VPC uses:
-
-```text
-10.0.0.0/16
-```
-
-as the default CIDR.
-
-Public subnet examples:
-
-```text
-10.0.1.0/24
-10.0.2.0/24
-10.0.3.0/24
-```
-
-Private subnet examples:
-
-```text
-10.0.10.0/24
-10.0.20.0/24
-10.0.30.0/24
-```
-
-The exact values can be changed through Terraform variables.
-
----
-
-#  Internet Gateway
-
-The Internet Gateway provides internet connectivity for resources in public subnets.
-
-Public route:
-
-```text
-0.0.0.0/0
-      ↓
-Internet Gateway
-```
-
----
-
-#  NAT Gateway
-
-The project uses a single NAT Gateway.
-
-Private subnet traffic follows:
-
-```text
-Private Subnet
-      ↓
-NAT Gateway
-      ↓
-Internet Gateway
-      ↓
-Internet
-```
-
-A single NAT Gateway is used as a cost-conscious development configuration.
-
-For highly available production environments, NAT gateways are commonly deployed per Availability Zone.
-
----
-
-#  Security Groups
-
-The EC2 Security Group controls access to the EC2/Jenkins host.
-
-SSH:
-
-```text
-TCP 22
-```
-
-Jenkins:
-
-```text
-TCP 8080
-```
-
-Access is controlled using:
-
-```text
-allowed_ssh_cidrs
-```
-
-The default configuration does not expose these ports to the entire internet.
-
-If access is required, a restricted CIDR such as:
-
-```text
-YOUR_PUBLIC_IP/32
-```
-
-should be supplied.
-
----
-
-#  EC2 Infrastructure
-
-Terraform creates an EC2 instance in a public subnet.
-
-The EC2 instance is intended to provide a host for operational tooling such as Jenkins.
-
-The instance uses:
-
-```text
-EC2 instance type: t3.medium by default
-Root volume: 50 GB gp3
-Root volume: encrypted
-```
-
-The EC2 bootstrap script installs:
-
-```text
-Docker
-kubectl
-AWS CLI
-```
-
-The instance receives a public IP because it is deployed in the public subnet.
-
----
-
-#  Amazon EKS
-
-The project uses Amazon EKS as the managed Kubernetes control plane.
-
-Terraform creates:
-
-```text
-EKS Cluster
-       │
-       ▼
-Managed Node Group
-       │
-       ├── Worker Node
-       └── Worker Node
-```
-
-The default managed node group configuration is:
-
-```text
-Instance type: t3.medium
-Desired nodes: 2
-Minimum: 1
-Maximum: 4
-```
-
-The node group runs inside the private subnets.
-
----
-
-#  EKS IAM Roles
-
-Two main IAM roles are used.
-
-## EKS Cluster Role
-
-The EKS control plane assumes this role.
-
-It includes:
-
-```text
-AmazonEKSClusterPolicy
-AmazonEKSVPCResourceController
-```
-
-## EKS Node Role
-
-Worker nodes use this role.
-
-It includes policies for:
-
-```text
-AmazonEKSWorkerNodePolicy
-AmazonEKS_CNI_Policy
-AmazonEBSCSIDriverPolicy
-```
-
-The EBS CSI permissions are required for Kubernetes persistent storage backed by EBS.
-
----
-
-#  EKS API Access
-
-The cluster has:
-
-```text
-Private API access: enabled
-Public API access: enabled
-```
-
-Public API access is restricted through:
-
-```text
-eks_public_access_cidrs
-```
-
-The CIDR should be replaced with the appropriate restricted client network before deployment.
-
----
-
-#  Kubernetes Architecture
-
-The Kubernetes namespace is:
-
-```text
-taskmanager
-```
-
-Resources include:
-
-```text
-Namespace
-StorageClass
-PersistentVolumeClaim
-PostgreSQL Deployment
-PostgreSQL Service
-Backend Deployment
-Backend Service
-Frontend Deployment
-Frontend LoadBalancer Service
-Ingress
-```
-
----
-
-#  Kubernetes Namespace
-
-The namespace isolates the application resources:
-
-```bash
-kubectl get all -n taskmanager
-```
-
-Create it manually if needed:
-
-```bash
-kubectl apply -f k8s/namespace.yaml
-```
-
----
-
-#  PostgreSQL Deployment
-
-PostgreSQL runs as a Kubernetes Deployment.
-
-Configuration:
-
-```text
-Image: postgres:15-alpine
-Port: 5432
-Replicas: 1
-```
-
-The database uses:
-
-```text
-POSTGRES_USER
-POSTGRES_PASSWORD
-POSTGRES_DB
-```
-
-The password comes from a Kubernetes Secret.
-
-The database has:
-
-```text
-Readiness Probe
-Liveness Probe
-CPU requests/limits
-Memory requests/limits
-Ephemeral storage requests/limits
-```
-
----
-
-#  Persistent Storage
-
-PostgreSQL uses persistent storage.
-
-The storage flow is:
-
-```text
-PostgreSQL
-    ↓
-PersistentVolumeClaim
-    ↓
-StorageClass
-    ↓
-AWS EBS CSI Driver
-    ↓
-Amazon EBS Volume
-```
-
-The PVC requests:
-
-```text
-5Gi
-```
-
-and uses:
-
-```text
-ReadWriteOnce
-```
-
----
-
-#  StorageClass
-
-The project defines:
-
-```text
-StorageClass: taskmanager-gp3
-Provisioner: ebs.csi.aws.com
-Volume type: gp3
-```
-
-The StorageClass uses:
-
-```text
-WaitForFirstConsumer
-```
-
-This allows the volume to be provisioned with awareness of where the consuming pod is scheduled.
-
----
-
-#  Backend Deployment
-
-The backend Deployment runs:
-
-```text
-Flask + Gunicorn
-```
-
-Port:
-
-```text
-8888
-```
-
-Default replicas:
-
-```text
-1
-```
-
-The deployment uses:
-
-```text
-RollingUpdate
-```
-
-with:
-
-```text
-maxUnavailable: 1
-maxSurge: 1
-```
-
-The backend includes:
-
-### Startup Probe
-
-```text
-/api/health
-```
-
-### Liveness Probe
-
-```text
-/api/health
-```
-
-### Readiness Probe
-
-```text
-/api/ready
-```
-
-These allow Kubernetes to determine whether the backend has started, is healthy, and is ready to receive traffic.
-
----
-
-#  Frontend Deployment
-
-The frontend runs Nginx.
-
-Port:
-
-```text
-80
-```
-
-Replicas:
-
-```text
-2
-```
-
-The frontend includes:
-
-```text
-Liveness Probe
-Readiness Probe
-CPU requests/limits
-Memory requests/limits
-Ephemeral storage limits
-```
-
----
-
-#  Frontend Service
-
-The frontend Service is:
-
-```text
-type: LoadBalancer
-```
-
-Therefore AWS can provision an external load balancer for the Kubernetes Service.
-
-Traffic flow:
-
-```text
-Internet
-   ↓
-AWS Load Balancer
-   ↓
-Frontend Service
-   ↓
-Frontend Pods
-```
-
----
-
-#  Kubernetes Ingress
-
-An optional Ingress configuration is provided.
-
-Ingress class:
-
-```text
-nginx
-```
-
-Host:
-
-```text
-taskmanager.local
-```
-
-Routing:
-
-```text
-/
-   ↓
-frontend:80
-
-/api
-   ↓
-backend:8888
-```
-
-An Nginx Ingress Controller must exist in the cluster for this manifest to actually provide ingress functionality.
-
-The frontend LoadBalancer works independently of this Ingress configuration.
-
----
-
-#  Kubernetes Deployment Order
-
-A safe deployment sequence is:
-
-```text
-1. Namespace
-       ↓
-2. EBS CSI Driver
-       ↓
-3. StorageClass
-       ↓
-4. Kubernetes Secrets
-       ↓
-5. PostgreSQL PVC
-       ↓
-6. PostgreSQL Deployment
-       ↓
-7. Wait for PostgreSQL
-       ↓
-8. Backend Deployment
-       ↓
-9. Frontend Deployment
-       ↓
-10. Ingress
-       ↓
-11. Verify rollouts
-```
-
----
-
-#  Complete CI/CD Flow
-
-```text
-                    GitHub
-                       │
-                       ▼
-                   Jenkins
-                       │
-               ┌───────┴────────┐
-               │                │
-               ▼                ▼
-        Backend Image     Frontend Image
-               │                │
-               └───────┬────────┘
-                       │
-                       ▼
-                 Docker Compose
-                    Testing
-                       │
-                       ▼
-                  Docker Hub
-                       │
-                       ▼
-                    AWS EKS
-                       │
-              ┌────────┼─────────┐
-              ▼        ▼         ▼
-           Frontend Backend PostgreSQL
-              │        │         │
-              │        │         ▼
-              │        │      EBS Volume
-              │        │
-              └────────┴───────┐
-                               ▼
-                         Running App
-```
-
----
-
-#  Environment Variables and Secrets
-
-## Local Environment
-
-The repository provides:
-
-```text
-.env.example
-```
-
-Sensitive values should be stored in:
-
-```text
-.env
-```
-
-and should not be committed.
-
-Important variables include:
-
-```text
-POSTGRES_USER
-POSTGRES_PASSWORD
-POSTGRES_DB
-SECRET_KEY
-FLASK_ENV
-DB_HOST
-```
-
----
-
-#  Jenkins Credentials
-
-The Jenkins pipeline expects these credentials:
-
-```text
-dockerhub-credentials
-aws-credentials
-taskmanager-db-password
-taskmanager-app-secret-key
-```
-
-### Docker Hub
-
-```text
-dockerhub-credentials
-```
-
-stores Docker Hub username/password.
-
-### AWS
-
-```text
-aws-credentials
-```
-
-provides AWS credentials to the pipeline.
-
-### PostgreSQL Password
-
-```text
-taskmanager-db-password
-```
-
-stores the PostgreSQL password.
-
-### Flask Secret
-
-```text
-taskmanager-app-secret-key
-```
-
-stores the application's secret key.
-
-Credential values are not stored in the Git repository.
-
----
-
-#  Jenkins Build Parameters
-
-The pipeline uses:
-
-```text
-DOCKERHUB_NAMESPACE
-AWS_REGION
-EKS_CLUSTER_NAME
-```
-
-Example:
-
-```text
-DOCKERHUB_NAMESPACE = your-dockerhub-username
-AWS_REGION = us-east-1
-EKS_CLUSTER_NAME = taskmanager-eks
-```
-
-These values should be changed according to the deployment environment.
-
----
-
-#  Security Practices
-
-The project uses several practical security measures.
-
-## Secrets
-
-Sensitive credentials are not hardcoded into the Jenkinsfile.
-
-Jenkins credentials are used instead.
-
-Kubernetes Secrets are generated during deployment.
-
----
-
-## Password Protection
-
-Application passwords are stored using password hashing rather than storing plaintext passwords.
-
----
-
-## Kubernetes Service Account Tokens
-
-Application pods disable automatic ServiceAccount token mounting where Kubernetes API access is not required.
-
-This reduces unnecessary credential exposure inside application containers.
-
----
-
-## EKS API Restrictions
-
-The EKS public API endpoint is restricted through:
-
-```text
-eks_public_access_cidrs
-```
-
-instead of intentionally allowing every public IP.
-
----
-
-## EC2 SSH Restrictions
-
-SSH access is controlled using:
-
-```text
-allowed_ssh_cidrs
-```
-
-The default configuration does not expose SSH globally.
-
----
-
-## Encrypted EC2 Storage
-
-The EC2 root EBS volume is configured with encryption.
-
----
-
-## Container Security
-
-The Docker images use relatively small base images:
-
-```text
-python:3.11-slim
-nginx:alpine
-postgres:15-alpine
-```
-
----
-
-#  Health Checks
-
-## Backend
-
-Health:
-
-```text
-GET /api/health
-```
-
-Readiness:
-
-```text
-GET /api/ready
-```
-
-These endpoints are used by Kubernetes probes.
-
----
-
-## PostgreSQL
-
-PostgreSQL uses:
-
-```bash
-pg_isready
-```
-
-for readiness and liveness checks.
-
----
-
-## Frontend
-
-The frontend checks:
-
-```text
-/
-```
-
-through Nginx.
-
----
-
-#  Deployment Verification
-
-After deploying to EKS:
-
-## Check Cluster
-
-```bash
-kubectl cluster-info
-```
-
-## Check Nodes
-
-```bash
-kubectl get nodes
-```
-
-## Check Pods
-
-```bash
-kubectl get pods -n taskmanager
-```
-
-## Check Services
-
-```bash
-kubectl get services -n taskmanager
-```
-
-## Check Deployments
-
-```bash
-kubectl get deployments -n taskmanager
-```
-
-## Check PVC
-
-```bash
-kubectl get pvc -n taskmanager
-```
-
-## Check Everything
-
-```bash
-kubectl get all -n taskmanager
-```
-
----
-
-# 🐛 Troubleshooting Guide
-
-## Issue: Docker Container Does Not Start
-
-Check:
-
-```bash
-docker compose ps
-```
-
-Then:
-
-```bash
-docker compose logs backend
-```
-
-or:
-
-```bash
-docker compose logs frontend
-```
-
-Check the container:
-
-```bash
-docker inspect <container>
-```
-
----
-
-# Issue: PostgreSQL Is Not Ready
-
-Check:
-
-```bash
-docker compose logs postgres
-```
-
-Verify:
-
-```bash
-docker compose ps
-```
-
-The backend waits for PostgreSQL before starting.
-
-Check environment variables:
-
-```text
-POSTGRES_USER
-POSTGRES_PASSWORD
-POSTGRES_DB
-DB_HOST
-```
-
----
-
-# Issue: Backend Cannot Connect to PostgreSQL
-
-Inside Docker Compose, the backend should use:
-
-```text
-DB_HOST=postgres
-```
-
-not:
-
-```text
-localhost
-```
-
-Why?
-
-Because `localhost` inside the backend container refers to the backend container itself.
-
-Docker Compose provides service discovery through the service name:
-
-```text
-postgres
-```
-
----
-
-# Issue: Kubernetes Pod Is Pending
-
-Check:
-
-```bash
-kubectl get pods -n taskmanager
-```
-
-Then:
-
-```bash
-kubectl describe pod <pod-name> -n taskmanager
-```
-
-Check worker nodes:
-
-```bash
-kubectl get nodes
-```
-
-Check resources:
-
-```bash
-kubectl describe nodes
-```
-
-Common causes include:
-
-* insufficient CPU
-* insufficient memory
-* unavailable node
-* PVC not bound
-* scheduling constraints
-
----
-
-# Issue: PostgreSQL PVC Is Pending
-
-Check:
-
-```bash
-kubectl get pvc -n taskmanager
-```
-
-Then:
-
-```bash
-kubectl describe pvc postgres-pvc -n taskmanager
-```
-
-Check StorageClass:
-
-```bash
-kubectl get storageclass
-```
-
-Check EBS CSI:
-
-```bash
-aws eks describe-addon \
-  --cluster-name taskmanager-eks \
-  --addon-name aws-ebs-csi-driver
-```
-
-The EBS CSI add-on must be available for EBS-backed persistent storage.
-
----
-
-# Issue: Backend Pod Is Not Ready
-
-Check:
-
-```bash
-kubectl get pods -n taskmanager
-```
-
-Then:
-
-```bash
-kubectl describe pod <backend-pod> -n taskmanager
-```
-
-View logs:
-
-```bash
-kubectl logs <backend-pod> -n taskmanager
-```
-
-Check the health endpoint:
-
-```text
-/api/health
-```
-
-and readiness endpoint:
-
-```text
-/api/ready
-```
-
----
-
-# Issue: Frontend Is Not Accessible
-
-Check:
-
-```bash
-kubectl get service frontend -n taskmanager
-```
-
-The frontend Service should be:
-
-```text
-LoadBalancer
-```
-
-Check:
-
-```bash
-kubectl describe service frontend -n taskmanager
-```
-
-Check frontend pods:
-
-```bash
-kubectl get pods -l app=frontend -n taskmanager
-```
-
----
-
-# Issue: Jenkins Cannot Access EKS
-
-Verify AWS credentials:
-
-```bash
-aws sts get-caller-identity
-```
-
-Verify the cluster:
-
-```bash
-aws eks describe-cluster \
-  --name taskmanager-eks \
-  --region us-east-1
-```
-
-Then configure kubeconfig:
-
-```bash
-aws eks update-kubeconfig \
-  --name taskmanager-eks \
-  --region us-east-1
-```
-
-Test:
-
-```bash
-kubectl get nodes
-```
-
----
-
-# Issue: Jenkins Docker Build Fails
-
-Check:
-
-```bash
-docker version
-```
-
-Check:
-
-```bash
-docker info
-```
-
-Check Dockerfile:
-
-```text
-backend/Dockerfile
-frontend/Dockerfile
-```
-
-Build manually:
-
-```bash
-docker build -t taskmanager-backend:test backend
-```
-
-and:
-
-```bash
-docker build -t taskmanager-frontend:test frontend
-```
-
----
-
-# Issue: Docker Hub Push Fails
-
-Verify Docker login:
-
-```bash
-docker login
-```
-
-Check the image:
-
-```bash
-docker images
-```
-
-Verify the image name:
-
-```text
-<DOCKERHUB_NAMESPACE>/taskmanager-backend:<BUILD_NUMBER>
-```
-
----
-
-# Issue: Kubernetes Deployment Rollout Fails
-
-Check:
-
-```bash
-kubectl rollout status deployment/backend \
-  -n taskmanager
-```
-
-Then:
-
-```bash
-kubectl describe deployment backend \
-  -n taskmanager
-```
-
-Check pods:
-
-```bash
-kubectl get pods -n taskmanager
-```
-
-View logs:
-
-```bash
-kubectl logs deployment/backend \
-  -n taskmanager
-```
-
----
-
-#  Important Commands
-
-## Git
-
-```bash
-git status
-git add .
-git commit -m "message"
-git push origin main
-git log --oneline
-```
-
----
-
-#  Docker
-
-Build:
+Build backend:
 
 ```bash
 docker build -t taskmanager-backend ./backend
+```
+
+Build frontend:
+
+```bash
+docker build -t taskmanager-frontend ./frontend
 ```
 
 List images:
@@ -2138,50 +1717,10 @@ List images:
 docker images
 ```
 
-List containers:
-
-```bash
-docker ps
-```
-
-View logs:
-
-```bash
-docker logs <container>
-```
-
-Remove container:
-
-```bash
-docker rm <container>
-```
-
----
-
-#  Docker Compose
-
-Start:
+Run Docker Compose:
 
 ```bash
 docker compose up --build
-```
-
-Background:
-
-```bash
-docker compose up -d
-```
-
-Check:
-
-```bash
-docker compose ps
-```
-
-Logs:
-
-```bash
-docker compose logs -f
 ```
 
 Stop:
@@ -2190,486 +1729,853 @@ Stop:
 docker compose down
 ```
 
-Remove database volume:
+Stop and remove volumes:
 
 ```bash
-docker compose down -v
+docker compose down --volumes
 ```
 
 ---
 
-#  Terraform Commands
+# Troubleshooting
+
+## Pod is Pending
+
+Check:
 
 ```bash
-terraform init
-terraform fmt
-terraform validate
-terraform plan
-terraform apply
-terraform output
-terraform destroy
+kubectl describe pod <pod-name> -n taskmanager
 ```
 
-Useful debugging:
+Common reasons:
 
-```bash
-terraform show
-terraform state list
-```
+* Insufficient node resources
+* PVC not bound
+* StorageClass problem
+* EBS CSI driver issue
+* Scheduling constraints
 
 ---
 
-#  AWS CLI Commands
+# PostgreSQL Pod Not Starting
 
-Check identity:
-
-```bash
-aws sts get-caller-identity
-```
-
-Check EKS:
+Check:
 
 ```bash
-aws eks list-clusters
+kubectl logs deployment/taskmanager-postgres -n taskmanager
 ```
 
-Update kubeconfig:
-
-```bash
-aws eks update-kubeconfig \
-  --name taskmanager-eks \
-  --region us-east-1
-```
-
-Check EBS CSI:
-
-```bash
-aws eks describe-addon \
-  --cluster-name taskmanager-eks \
-  --addon-name aws-ebs-csi-driver \
-  --region us-east-1
-```
-
----
-
-#  Kubernetes Commands
-
-Cluster:
-
-```bash
-kubectl cluster-info
-kubectl get nodes
-```
-
-Pods:
-
-```bash
-kubectl get pods -n taskmanager
-kubectl get pods -n taskmanager -o wide
-```
-
-Deployments:
-
-```bash
-kubectl get deployments -n taskmanager
-```
-
-Services:
-
-```bash
-kubectl get services -n taskmanager
-```
-
-PVC:
+Check PVC:
 
 ```bash
 kubectl get pvc -n taskmanager
 ```
 
-StorageClass:
+Check events:
+
+```bash
+kubectl get events -n taskmanager --sort-by=.lastTimestamp
+```
+
+---
+
+# PVC Stuck in Pending
+
+Check:
+
+```bash
+kubectl get pvc -n taskmanager
+```
+
+Check:
+
+```bash
+kubectl describe pvc <pvc-name> -n taskmanager
+```
+
+Check:
 
 ```bash
 kubectl get storageclass
 ```
 
-Logs:
+Verify the EBS CSI driver is available:
 
 ```bash
-kubectl logs <pod> -n taskmanager
-```
-
-Describe:
-
-```bash
-kubectl describe pod <pod> -n taskmanager
-```
-
-Rollout:
-
-```bash
-kubectl rollout status deployment/backend -n taskmanager
-```
-
-Restart:
-
-```bash
-kubectl rollout restart deployment/backend -n taskmanager
+aws eks describe-addon \
+  --cluster-name <cluster-name> \
+  --addon-name aws-ebs-csi-driver
 ```
 
 ---
 
-#  Updating the Application
+# Backend Pod CrashLoopBackOff
 
-The normal workflow is:
+Check logs:
+
+```bash
+kubectl logs <backend-pod> -n taskmanager
+```
+
+Check environment variables and secrets:
+
+```bash
+kubectl describe pod <backend-pod> -n taskmanager
+```
+
+Check PostgreSQL:
+
+```bash
+kubectl get pods -n taskmanager
+```
+
+The backend depends on PostgreSQL being available.
+
+---
+
+# Frontend Cannot Reach Backend
+
+Check:
+
+```bash
+kubectl get svc -n taskmanager
+```
+
+Check backend service:
+
+```bash
+kubectl describe svc taskmanager-backend -n taskmanager
+```
+
+Check frontend Nginx configuration.
+
+The frontend should proxy:
+
+```text
+/api/
+```
+
+to the backend Kubernetes service.
+
+---
+
+# Jenkins Docker Build Failure
+
+Check that the Jenkins agent has:
+
+```text
+Docker
+Docker Compose
+```
+
+available.
+
+Run:
+
+```bash
+docker version
+```
+
+and:
+
+```bash
+docker compose version
+```
+
+---
+
+# Jenkins Cannot Access AWS
+
+Check the Jenkins credential:
+
+```text
+aws-credentials
+```
+
+Verify that the credential has permissions required for EKS access.
+
+Also verify:
+
+```bash
+aws sts get-caller-identity
+```
+
+from the Jenkins environment.
+
+---
+
+# Jenkins Cannot Deploy to Kubernetes
+
+Check:
+
+```bash
+aws eks update-kubeconfig
+```
+
+Then:
+
+```bash
+kubectl get nodes
+```
+
+Verify that the Jenkins environment can access the EKS API.
+
+---
+
+# Docker Hub Push Failure
+
+Check the Jenkins credential:
+
+```text
+dockerhub-credentials
+```
+
+Verify the Docker Hub namespace:
+
+```text
+DOCKERHUB_NAMESPACE
+```
+
+Also verify:
+
+```bash
+docker login
+```
+
+works from the Jenkins agent.
+
+---
+
+# Updating the Application
+
+To update the application:
 
 ```text
 1. Modify application code
-        ↓
+        |
+        v
 2. Test locally
-        ↓
+        |
+        v
 3. Commit changes
-        ↓
+        |
+        v
 4. Push to GitHub
-        ↓
+        |
+        v
 5. Jenkins starts
-        ↓
-6. Build new Docker images
-        ↓
-7. Run Compose test
-        ↓
-8. Push new build-tagged images
-        ↓
-9. Configure EKS
-        ↓
-10. Apply Kubernetes configuration
-        ↓
-11. Update deployment images
-        ↓
-12. Wait for rollout
-        ↓
-13. Verify application
+        |
+        v
+6. Docker images are rebuilt
+        |
+        v
+7. Docker Compose tests run
+        |
+        v
+8. Images are pushed to Docker Hub
+        |
+        v
+9. Jenkins updates EKS deployments
+        |
+        v
+10. Kubernetes performs rolling update
 ```
+
+The Jenkins build number is used as the image tag.
+
+This makes each deployment traceable to a specific Jenkins build.
 
 ---
 
-#  Destroying the Infrastructure
+# Destroying AWS Infrastructure
 
-For disposable development environments:
+When the environment is no longer required:
 
 ```bash
-cd terraform
-terraform plan -destroy
 terraform destroy
 ```
 
-Always review what will be deleted.
+Terraform will remove the resources managed by the Terraform configuration.
 
-AWS resources such as:
+Always review the Terraform plan before destroying infrastructure.
 
-```text
-EC2
-EKS
-NAT Gateway
-Load Balancer
-EBS
-```
-
-can incur charges.
-
-Persistent resources should be reviewed carefully before destruction.
+Database and other persistent resources should be treated carefully because destruction can result in data loss.
 
 ---
 
-#  Project Limitations
+# Current Project Scope
 
-This project intentionally focuses on core DevOps and cloud deployment concepts.
+The project intentionally focuses on a manageable set of DevOps technologies.
 
-The current implementation does **not** include:
+The current implementation includes:
+
+```text
+Application
+    |
+Docker
+    |
+Docker Compose
+    |
+Terraform
+    |
+AWS
+    |
+EKS
+    |
+Kubernetes
+    |
+Jenkins
+    |
+Docker Hub
+```
+
+The purpose is to demonstrate practical understanding rather than adding a large number of DevOps tools without a real requirement.
+
+---
+
+# Tools Intentionally Not Included
+
+The project does not currently use:
 
 * SonarQube
 * Prometheus
 * Grafana
-* AlertManager
+* Alertmanager
 * ArgoCD
 * Helm
 * Redis
 * Kafka
 * Loki
 * Service mesh
-* AWS RDS
-* AWS ECR
-* Automated rollback
-* Full production-grade observability platform
+* Amazon RDS
+* Amazon ECR
+* HPA
 * Multi-region deployment
 
-These are not required for the current project workflow.
+These tools can be added later if the project requirements expand.
 
 ---
 
-#  Future Improvements
+# Limitations
+
+The current project is a practical DevOps learning and portfolio project rather than a complete enterprise production platform.
+
+Current limitations include:
+
+* PostgreSQL runs as a single Kubernetes replica
+* No database replication
+* No automated database backup strategy
+* No HPA
+* No Prometheus/Grafana monitoring
+* No centralized logging
+* No automated rollback system
+* No multi-region deployment
+* No managed RDS database
+* Docker Hub is used as the image registry
+* Terraform remote S3 state is not currently enabled
+* Jenkins deployment is intentionally simple
+* Optional Ingress requires a separately installed Nginx Ingress Controller
+
+These limitations are intentional to keep the project understandable and manageable.
+
+---
+
+# Future Improvements
 
 Possible future improvements include:
 
-### CI/CD
+## Infrastructure
 
-* Automated rollback
-* Approval gates
-* More extensive automated tests
-* Security scanning
-* Image vulnerability scanning
+* Enable Terraform remote state using Amazon S3
+* Add state locking where appropriate
+* Separate environments such as dev/staging/prod
+* Improve IAM least-privilege policies
+* Add additional networking controls
 
-### Kubernetes
+## Kubernetes
 
-* Horizontal Pod Autoscaler
-* PodDisruptionBudget
-* NetworkPolicies
-* More replicas for backend
-* Separate production/staging namespaces
+* Add Horizontal Pod Autoscaler
+* Add PodDisruptionBudget
+* Add NetworkPolicies
+* Improve resource tuning
+* Add automated rollback
 
-### Observability
+## Database
 
-* Prometheus
-* Grafana
-* Centralized logging
-* Alerting
+* Move PostgreSQL to Amazon RDS
+* Add automated backups
+* Add high availability
+* Add database monitoring
 
-### Infrastructure
+## CI/CD
 
-* S3 remote Terraform state
-* Terraform state locking
-* Highly available NAT gateways
-* Private EKS API endpoint
-* More restrictive IAM policies
+* Add automated security scanning
+* Add dependency scanning
+* Add automated rollback
+* Add deployment approvals
+* Add better pipeline notifications
 
-### Application
+## Observability
 
-* Automated database migrations
-* More comprehensive tests
-* API documentation
-* Better error handling
+* Add Prometheus
+* Add Grafana
+* Add centralized logging
+* Add alerting
 
-These are future improvements rather than claims about the current implementation.
+## GitOps
+
+A future version could introduce:
+
+* ArgoCD
+* GitOps-based Kubernetes deployments
+* Separate application and deployment repositories
 
 ---
 
-#  Current Architecture vs Production Architecture
+# Current vs Production Architecture
 
-The current project is designed as a practical DevOps portfolio project.
+## Current Project
 
 ```text
-CURRENT PROJECT
-
 GitHub
-   ↓
+   |
+   v
 Jenkins
-   ↓
-Docker
-   ↓
-Docker Hub
-   ↓
-AWS EKS
-   ↓
-Kubernetes
-   ├── Frontend
-   ├── Backend
-   └── PostgreSQL
-          ↓
-        EBS
+   |
+   +--> Docker Build
+   |
+   +--> Docker Compose Test
+   |
+   +--> Docker Hub
+   |
+   +--> EKS Deployment
+            |
+            +--> Frontend
+            |
+            +--> Backend
+            |
+            +--> PostgreSQL
+                     |
+                     +--> EBS
 ```
 
-A larger production environment could additionally introduce:
+## Possible Production Evolution
 
 ```text
-Production Extensions
-
-        GitHub
-           ↓
-        CI/CD
-           ↓
-    Image Security Scan
-           ↓
-     Container Registry
-           ↓
-        EKS
-      /     \
-Frontend   Backend
-              │
-              ▼
-        Managed Database
-
-Observability:
-Prometheus → Grafana → Alerting
-
-GitOps:
+GitHub
+   |
+   v
+CI Pipeline
+   |
+   +--> Build
+   +--> Test
+   +--> Security Scan
+   |
+   v
+Container Registry
+   |
+   v
+GitOps Repository
+   |
+   v
 ArgoCD
-
-Security:
-Secrets Manager / External Secrets
+   |
+   v
+Amazon EKS
+   |
+   +--> Frontend
+   +--> Backend
+   |
+   v
+Amazon RDS
+   |
+   v
+Monitoring
+   |
+   +--> Prometheus
+   +--> Grafana
+   +--> Logging
 ```
 
-These additional components are possible future extensions and are not part of the current implementation.
+The second architecture represents possible future improvements and is not the current implementation.
 
 ---
 
-#  Project Documentation
+# Project Documentation
 
-The repository contains additional documentation for understanding the implementation.
+Additional project documentation is available in the repository.
 
-### `DEVOPS-FILES-EXPLAINED.md`
+## DEVOPS-FILES-EXPLAINED.md
 
-Provides explanations of the DevOps-related files and their purpose.
+Provides explanations of the major DevOps files and configurations.
 
-### `INTERVIEW-PROJECT-EXPLANATION.md`
+Topics include:
 
-Provides a deeper explanation of the project for interview preparation.
+* Terraform files
+* Kubernetes manifests
+* Docker files
+* Jenkinsfile
+* Infrastructure configuration
 
-### `PROJECT-QUESTION-BANK.md`
+## INTERVIEW-PROJECT-EXPLANATION.md
 
-Contains project-specific interview questions and answers.
+Contains project explanations useful for technical interviews.
 
-### `terraform/README.md`
+Topics include:
 
-Contains Terraform-specific infrastructure setup instructions.
+* Project overview
+* Architecture
+* DevOps workflow
+* AWS infrastructure
+* Kubernetes
+* Jenkins
+* Troubleshooting
+
+## PROJECT-QUESTION-BANK.md
+
+Contains common interview questions related to the project and its technologies.
 
 ---
 
-#  Contributing
+# Contributing
 
-## Development Workflow
-
-Create a feature branch:
+To contribute:
 
 ```bash
-git checkout -b feature/my-feature
+git checkout -b feature/your-feature
 ```
 
-Make your changes.
+Make the required changes.
 
-Test locally:
+Test the application locally.
 
-```bash
-docker compose up --build
-```
-
-Check the application.
-
-Then commit:
+Commit the changes:
 
 ```bash
 git add .
-git commit -m "feat: describe change"
+git commit -m "feat: describe your change"
 ```
 
-Push:
+Push the branch:
 
 ```bash
-git push origin feature/my-feature
+git push origin feature/your-feature
 ```
 
-Create a Pull Request.
+Create a pull request.
 
 ---
 
-#  Project Summary
+# Interview Explanation
 
-| Category               | Implementation         |
-| ---------------------- | ---------------------- |
-| Application            | Task Manager           |
-| Backend                | Flask                  |
-| Frontend               | HTML/CSS/JavaScript    |
-| Web Server             | Nginx                  |
-| Application Server     | Gunicorn               |
-| Database               | PostgreSQL 15          |
-| Local Containerization | Docker                 |
-| Local Orchestration    | Docker Compose         |
-| Cloud                  | AWS                    |
-| Infrastructure as Code | Terraform              |
-| Kubernetes             | Kubernetes             |
-| Managed Kubernetes     | Amazon EKS             |
-| Worker Nodes           | EKS Managed Node Group |
-| Container Registry     | Docker Hub             |
-| CI/CD                  | Jenkins                |
-| Persistent Storage     | Amazon EBS             |
-| Storage Driver         | AWS EBS CSI            |
-| Database Storage       | 5Gi PVC                |
-| Frontend Port          | 80                     |
-| Backend Port           | 8888                   |
-| PostgreSQL Port        | 5432                   |
-| Kubernetes Namespace   | taskmanager            |
+## 30-Second Explanation
+
+> This is a cloud-native task management application built with Flask, PostgreSQL, Docker, Kubernetes, Terraform, AWS EKS, and Jenkins. I containerized the frontend and backend using Docker and use Docker Compose for local integration testing. Terraform provisions the AWS networking, EC2, IAM, EKS cluster, and managed node group. The application is deployed on EKS using Kubernetes manifests, with PostgreSQL using persistent EBS storage through the EBS CSI driver. Jenkins automates the process of building Docker images, testing them with Docker Compose, pushing them to Docker Hub, and deploying the new image versions to EKS.
 
 ---
 
-#  30-Second Interview Explanation
+# 2-Minute Explanation
 
-> "I built a cloud-native Task Manager application using Flask, PostgreSQL and a static Nginx frontend. I containerized the application using Docker and Docker Compose for local testing. For cloud deployment, I used Terraform to provision AWS networking, EC2, IAM and an EKS cluster with managed worker nodes. I deployed the frontend, Flask backend and PostgreSQL database using Kubernetes, with persistent EBS-backed storage for PostgreSQL. Finally, I implemented a Jenkins CI/CD pipeline that builds the Docker images, tests the application using Docker Compose, pushes the images to Docker Hub, and deploys the updated images to EKS."
+> The project is a task management application with a Flask backend, PostgreSQL database, and Nginx-based frontend.
+>
+> I started by containerizing the application. The backend runs using Gunicorn and the frontend is served through Nginx. Docker Compose is used locally to run PostgreSQL, backend, and frontend together.
+>
+> For AWS infrastructure, I used Terraform. Terraform creates a VPC with public and private subnets across multiple Availability Zones, an Internet Gateway, NAT Gateway, route tables, security groups, an EC2 operational host, IAM roles, an Amazon EKS cluster, and a managed node group.
+>
+> The EKS worker nodes run in private subnets. The EKS API endpoint has public and private access enabled, with public access restricted using configurable CIDRs.
+>
+> On Kubernetes, I created a separate namespace for the application. The frontend, backend, and PostgreSQL run as separate deployments. PostgreSQL uses a PersistentVolumeClaim backed by AWS EBS through the EBS CSI driver, so database data is not stored only inside the container.
+>
+> For CI/CD, Jenkins checks out the code, builds the frontend and backend Docker images, runs the application using Docker Compose for a basic integration test, pushes the images to Docker Hub using the Jenkins build number as the image tag, and then deploys the new images to EKS.
+>
+> Jenkins also creates the required Kubernetes Secrets and ensures the EBS CSI add-on is available before deploying the PostgreSQL storage.
+>
+> The project intentionally keeps the application architecture simple so the main focus is on practical DevOps concepts such as Terraform, AWS networking, Docker, Kubernetes, EKS, persistent storage, Jenkins, and deployment troubleshooting.
 
 ---
 
-#  2-Minute Interview Explanation
+# Key DevOps Concepts Demonstrated
 
-> "The project is a full-stack Task Manager application with a Flask backend, Nginx frontend and PostgreSQL database. I first containerized the three services using Docker. Docker Compose allows me to run the complete application locally and verify that the backend can communicate with PostgreSQL before deploying it to AWS.
->
-> For the cloud infrastructure, I used Terraform. Terraform creates a VPC with public and private subnets across multiple Availability Zones, an Internet Gateway, NAT Gateway, route tables and security groups. It also provisions an EC2 instance and an Amazon EKS cluster with a managed node group running in the private subnets.
->
-> On Kubernetes, I created a dedicated namespace for the application. PostgreSQL runs with a PersistentVolumeClaim backed by Amazon EBS through the AWS EBS CSI driver. The Flask backend runs as a Deployment with health probes and resource limits, while the Nginx frontend runs with two replicas and is exposed using a LoadBalancer Service.
->
-> For CI/CD, Jenkins checks out the code, builds the frontend and backend Docker images, starts the application using Docker Compose for a basic integration check, pushes build-number-tagged images to Docker Hub, configures access to EKS, applies the Kubernetes resources, updates the images and waits for the deployments to successfully roll out.
->
-> The main goal of the project is to demonstrate the complete path from source code to containerization, infrastructure provisioning, Kubernetes deployment and CI/CD automation."
+This project demonstrates practical understanding of:
+
+## Docker
+
+* Writing Dockerfiles
+* Building images
+* Running containers
+* Docker Compose
+* Container networking
+* Multi-container applications
+
+## Terraform
+
+* Infrastructure as Code
+* Terraform variables
+* AWS provider
+* VPC creation
+* Subnets
+* Route tables
+* NAT Gateway
+* Security groups
+* IAM
+* EKS
+* Managed node groups
+
+## AWS
+
+* VPC
+* EC2
+* IAM
+* EKS
+* EBS
+* Availability Zones
+* Public/private networking
+* NAT Gateway
+* Security Groups
+
+## Kubernetes
+
+* Namespace
+* Deployment
+* Service
+* ClusterIP
+* LoadBalancer
+* PersistentVolumeClaim
+* StorageClass
+* Secrets
+* Probes
+* Resource requests/limits
+* Rolling updates
+
+## Jenkins
+
+* Pipeline stages
+* Credentials
+* Docker builds
+* Automated testing
+* Docker Hub publishing
+* AWS authentication
+* kubectl deployment
+* Rollout verification
 
 ---
 
-#  Final Project Flow
+# Important Ports
+
+| Component        | Port | Purpose               |
+| ---------------- | ---: | --------------------- |
+| Frontend / Nginx |   80 | Web application       |
+| Backend          | 8888 | Flask API             |
+| PostgreSQL       | 5432 | Database              |
+| Jenkins          | 8080 | Jenkins web interface |
+| Kubernetes API   |  443 | Kubernetes API        |
+
+---
+
+# Important Kubernetes Resources
+
+| Resource              | Name / Purpose         |
+| --------------------- | ---------------------- |
+| Namespace             | `taskmanager`          |
+| Backend Deployment    | Flask backend          |
+| Frontend Deployment   | Nginx frontend         |
+| PostgreSQL Deployment | PostgreSQL database    |
+| Backend Service       | ClusterIP              |
+| Frontend Service      | LoadBalancer           |
+| PostgreSQL Service    | ClusterIP              |
+| PostgreSQL PVC        | 5Gi persistent storage |
+| StorageClass          | `taskmanager-gp3`      |
+| Ingress               | Optional Nginx routing |
+
+---
+
+# Important AWS Resources
+
+The Terraform configuration creates resources including:
+
+* VPC
+* Public subnets
+* Private subnets
+* Internet Gateway
+* NAT Gateway
+* Route tables
+* Security groups
+* EC2 instance
+* IAM roles
+* EKS cluster
+* EKS managed node group
+
+The EKS node group uses private subnets.
+
+---
+
+# Important Jenkins Flow
 
 ```text
-                     ┌───────────────┐
-                     │   Developer   │
-                     └───────┬───────┘
-                             │
-                             ▼
-                     ┌───────────────┐
-                     │    GitHub     │
-                     └───────┬───────┘
-                             │
-                             ▼
-                     ┌───────────────┐
-                     │    Jenkins    │
-                     └───────┬───────┘
-                             │
-             ┌───────────────┼────────────────┐
-             │               │                │
-             ▼               ▼                ▼
-        Docker Build    Compose Test     Docker Hub
-             │                                │
-             └───────────────┬────────────────┘
-                             │
-                             ▼
-                    ┌────────────────┐
-                    │    AWS EKS     │
-                    │   Kubernetes   │
-                    └───────┬────────┘
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ▼              ▼              ▼
-        Frontend         Backend       PostgreSQL
-         Nginx            Flask          Database
-          :80             :8888           :5432
-             │              │              │
-             │              │              ▼
-             │              │         EBS Storage
-             │              │
-             └──────────────┴──────────────┐
-                                           ▼
-                                      Task Manager
+GitHub
+   |
+   v
+Checkout
+   |
+   v
+Build Docker Images
+   |
+   v
+Docker Compose Test
+   |
+   v
+Push to Docker Hub
+   |
+   v
+Configure EKS
+   |
+   v
+Deploy Kubernetes Resources
+   |
+   v
+Update Image Tags
+   |
+   v
+Wait for Rollout
+   |
+   v
+Verify Pods and Services
 ```
 
 ---
 
-#  Important Note
+# Important Troubleshooting Flow
 
-This README documents the **current implementation of the repository**.
+When an application is not working:
 
-It deliberately does not claim that the project contains monitoring, GitOps, ECR, RDS, Helm, SonarQube, Prometheus/Grafana, automatic rollback, or other components that are not part of the current implementation.
+```text
+1. Check nodes
+       |
+       v
+2. Check pods
+       |
+       v
+3. Check pod status
+       |
+       v
+4. Check pod logs
+       |
+       v
+5. Describe the pod
+       |
+       v
+6. Check services
+       |
+       v
+7. Check PVC
+       |
+       v
+8. Check storage class
+       |
+       v
+9. Check EBS CSI driver
+       |
+       v
+10. Check application configuration
+```
 
-The goal is to keep the documentation comprehensive while keeping the architecture technically accurate.
+Useful commands:
+
+```bash
+kubectl get nodes
+kubectl get pods -n taskmanager
+kubectl get svc -n taskmanager
+kubectl get pvc -n taskmanager
+kubectl get events -n taskmanager
+kubectl logs <pod> -n taskmanager
+kubectl describe pod <pod> -n taskmanager
+```
+
+---
+
+# Summary
+
+Cloud-Native Task Manager demonstrates an end-to-end DevOps workflow for deploying a containerized application on AWS.
+
+The project combines:
+
+```text
+Flask
+   +
+PostgreSQL
+   +
+Nginx
+   +
+Docker
+   +
+Docker Compose
+   +
+Terraform
+   +
+AWS
+   +
+Kubernetes
+   +
+Amazon EKS
+   +
+EBS CSI
+   +
+Jenkins
+   +
+Docker Hub
+```
+
+The complete workflow is:
+
+```text
+Developer
+    |
+    v
+GitHub
+    |
+    v
+Jenkins
+    |
+    +------------------+
+    |                  |
+    v                  v
+Docker Build      Docker Compose Test
+    |
+    v
+Docker Hub
+    |
+    v
+Amazon EKS
+    |
+    +-------------------+
+    |                   |
+    v                   v
+Frontend             Backend
+    |                   |
+    +---------+---------+
+              |
+              v
+         PostgreSQL
+              |
+              v
+          AWS EBS
+```
+
+The project focuses on practical DevOps fundamentals rather than adding unnecessary technologies.
+
+It provides hands-on experience with:
+
+* Containerization
+* Infrastructure as Code
+* AWS networking
+* EKS
+* Kubernetes
+* Persistent storage
+* CI/CD
+* Docker image management
+* Secrets
+* Health checks
+* Rolling deployments
+* Troubleshooting
+
+---
